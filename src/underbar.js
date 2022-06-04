@@ -103,69 +103,25 @@
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
-    // var uniq = {};
-    // var res = [];
-    // _.each(array, function(item) {
-    //   //var uniqItem = iterator === undefined ? iterator(item);
-    //   if(iterator !== undefined) {
-    //     var uniqItem = iterator(item);
-    //   } else {
-    //     uniqItem = item;
-    //   }
-    //   uniq[uniqItem] = item;
-    //   //uniq[item] = item;
-    //   //uniq = {true:1}
-    // });
-    // // _.each(uniq, function(value, key) {
-    // //   res.push(value);
-    // // });
-    // for (var key in uniq) {
-    //   res.push(uniq[key]);
-    // }
-    // return r
-    var outter = [];
-
-    if (iterator === undefined) {
-
-      for (var i = 0; i < array.length; i++) {
-
-        if (outter.includes(array[i])) {
-          continue;
-        } else {
-          outter.push(array[i]);
-        }
+    var uniq = {};
+    var res = [];
+    _.each(array, function(item) {
+      var uniqItem = iterator === undefined ? item : iterator(item);
+      if (uniq[uniqItem] === undefined) {
+        uniq[uniqItem] = item;
       }
 
-      return outter;
+    });
+    for (var key in uniq) {
+      res.push(uniq[key]);
     }
-
-    if (iterator) {
-
-      var inner = [];
-
-      _.each(array, function(num) {
-
-        if (outter.length === 0) {
-          outter.push(num);
-          inner.push(iterator(num));
-        } else {
-          if (!inner.includes(iterator(num))) {
-            inner.push(iterator(num));
-            outter.push(num);
-          }
-        }
-
-      });
-
-      return outter;
-    }
-
+    return res;
   };
 
 
   // Return the results of applying an iterator to each element.
   _.map = function(collection, iterator) {
-    var result  = [];
+    var result = [];
 
     iterator = iterator || _.identity;
     _.each(collection, function(item) {
@@ -373,7 +329,6 @@
 
     var arr = Array.from(arguments);
     return setTimeout(function() {
-
       func.apply(this, arr.slice(2));
     }, wait);
 
@@ -391,6 +346,33 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var copy = array.slice();
+    var results = [];
+    while (copy.length >= 1) {
+      var newIndex = Math.floor(Math.random() * (copy.length - 1));
+      // if statment
+      results.push(copy[newIndex]);
+      //delete the copy[newIndex] in the copy array;
+      copy.splice(newIndex, 1);
+    }
+    // _.each(copy, function(value, index) {
+    //   var newIndex = Math.floor(Math.random() * (index + 1));
+    //   results.push(copy[newIndex]);
+    // });
+    // copy = [4, 5, 6] length = 3
+    // newindex = 0
+    //results = [4]
+    // copy = [5,6] length = 2
+    // newindex = 0-1; 0
+    //results = [4,5];
+    // copy = [6] length = 1  results[ 4,6,5]
+    // copy = [] length = 0
+    // index = 0 value = 4; newIndex = 0
+    // result = [4]
+    // index =1 value =5 newIndex = 0/1
+    // index = 2 value 6 newIndex = 0/1/2
+
+    return results;
   };
 
 
