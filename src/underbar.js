@@ -355,24 +355,8 @@
       //delete the copy[newIndex] in the copy array;
       copy.splice(newIndex, 1);
     }
-    // _.each(copy, function(value, index) {
-    //   var newIndex = Math.floor(Math.random() * (index + 1));
-    //   results.push(copy[newIndex]);
-    // });
-    // copy = [4, 5, 6] length = 3
-    // newindex = 0
-    //results = [4]
-    // copy = [5,6] length = 2
-    // newindex = 0-1; 0
-    //results = [4,5];
-    // copy = [6] length = 1  results[ 4,6,5]
-    // copy = [] length = 0
-    // index = 0 value = 4; newIndex = 0
-    // result = [4]
-    // index =1 value =5 newIndex = 0/1
-    // index = 2 value 6 newIndex = 0/1/2
-
     return results;
+
   };
 
 
@@ -387,6 +371,10 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    return _.map(collection, function(item) {
+      var func = typeof functionOrKey === 'string' ? item[functionOrKey] : functionOrKey;
+      return func.apply(item, args);
+    });
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -394,6 +382,13 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    return collection.sort(function(a, b) {
+      if (typeof iterator === 'string') {
+        return a[iterator] - b[iterator];
+      } else {
+        return iterator(a) - iterator(b);
+      }
+    });
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -402,6 +397,21 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    var args = Array.from(arguments);
+    var res = [];
+    var maxLength = 0;
+    for (var i = 0; i < args.length; i++) {
+      if (args[i].length > maxLength) {
+        maxLength = args[i].length;
+      }
+    }
+    for (var j = 0; j < maxLength; j++) {
+      res.push(_.map(args, function(arg) {
+        return arg[j];
+      }));
+
+    }
+    return res;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -409,16 +419,58 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    var res = [];
+    _.each(nestedArray, function(elem) {
+      if (!Array.isArray(elem)) {
+        res.push(elem);
+      } else {
+        res = res.concat(_.flatten(elem));
+      }
+    });
+    return res;
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    var res = [];
+    var test = {};
+    var args = Array.from(arguments);
+    _.each(arguments[0], function(item) {
+      for (var i = 1; i < args.length; i++) {
+        if (_.indexOf(args[i], item) !== -1) {
+          test[item] = test[item] === undefined ? 1 : test[item] + 1;
+        }
+      }
+    });
+    for (var key in test) {
+      if (test[key] === args.length - 1) {
+        res.push(key);
+      }
+    }
+    return res;
   };
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+    var res = [];
+    var test = {};
+    var args = Array.from(arguments);
+    _.each(args[0], function(item) {
+      for (var i = 1; i < args.length; i++) {
+        if (_.indexOf(args[i], item) === -1) {
+          test[item] = test[item] === undefined ? 1 : test[item] + 1;
+        }
+      }
+    });
+    _.each(args[0], function(item) {
+      if (test[item] === args.length - 1) {
+        res.push(item);
+      }
+    });
+    return res;
+
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once
@@ -427,5 +479,12 @@
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+    // var called = false;
+    // var result, waitTime;
+    return function() {
+      setTimeout(function() {
+        func.apply(this, arguments);
+      }, wait);
+    };
   };
 }());
